@@ -1,0 +1,9 @@
+- hosts: vtryo
+  roles:
+    - common
+    - mysql
+    - h2o
+    - php7
+    - cron
+    - mackerel
+    - fail2ban
