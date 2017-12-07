@@ -1,0 +1,45 @@
+- name: base package
+  apt:
+    name: {{ item }}
+    state: present
+    with_items:
+      - vim
+      - zsh
+      - git
+      - tree
+      - htop
+      - mlocate
+      - gcc
+
+- name: change timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+
+- name: change hostname
+  hostname: {{ inventory_hostname }}
+
+- name: create user
+  user:
+    name: "{{ item.name }}"
+    createhome: yes
+    password: "{{ item.password | password_hash('sha512') }}"
+    shell: "{{ item.shell }}"
+    groups: nobody
+    state: "{{ item.state }}"
+    remove: "{{ item.remove }}"
+  with_items:
+    - { name: 'vtryo', password: '{{ user_password }}', shell: 'zsh', state: 'present', remove: 'no' }
+
+- name: add sudoers
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "{{ item.match }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { mathch: 'vtryo', line: 'vtryo ALL=(ALL) NOPASSWD: ALL' }
+
+- name: add authorized_key
+  authorized_key:
+    user: vtryo
+    key: "{{ vtryo_authorized_key }}"
